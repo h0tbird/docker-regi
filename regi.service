@@ -1,0 +1,25 @@
+[Unit]
+Description=Docker registry
+After=docker.service boot.service
+Requires=docker.service
+Wants=boot.service
+
+[Service]
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=0
+
+# Preparations for the container:
+ExecStartPre=-/usr/local/sbin/runctl-regi pre
+
+# Start the container:
+ExecStart=/usr/local/sbin/runctl-regi start
+
+# Setup the container's network:
+ExecStartPost=/usr/local/sbin/runctl-regi post
+
+# Stop the container:
+ExecStop=/usr/local/sbin/runctl-regi stop
+
+[Install]
+WantedBy=multi-user.target

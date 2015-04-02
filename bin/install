@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Hard-link the systemd unit:
+ln -f regi.service /etc/systemd/system/regi.service
+ln -f bin/runctl /usr/local/sbin/runctl-regi
+
+# Populate config if not present:
+[ -d /etc/booddies ] || mkdir /etc/booddies
+[ ! -f /etc/booddies/regi.conf ] && cp regi.conf /etc/booddies/
+
+# Reload systemd:
+systemctl daemon-reload

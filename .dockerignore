@@ -1,0 +1,8 @@
+bin
+.git
+.gitignore
+.dockerignore
+regi.service
+regi.conf
+README.md
+*.swp
