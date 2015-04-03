@@ -11,9 +11,9 @@ MAINTAINER Marc Villacorta Morera <marc.villacorta@gmail.com>
 
 RUN rpm --import http://mirror.centos.org/centos/7/os/x86_64/RPM-GPG-KEY-CentOS-7
 RUN rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-RUN yum update -y
-RUN yum install -y epel-release http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
-RUN yum install -y docker-registry
+RUN yum update -y && yum clean all
+RUN yum install -y epel-release && yum clean all
+RUN yum install -y docker-registry && yum clean all
 ADD rootfs /
 
 #------------------------------------------------------------------------------

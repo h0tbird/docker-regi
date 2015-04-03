@@ -110,7 +110,7 @@ function run_pre {
 
 function run_start {
   exec $DOCKER run -t \
-  --volume   ${DATA_DIR}:/tmp/registry \
+  --volume   ${DATA_DIR}:/var/lib/docker-registry \
   --hostname $HOSTNAME \
   --name     $ID \
   --net      none \
