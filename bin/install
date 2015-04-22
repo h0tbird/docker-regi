@@ -1,12 +1,80 @@
 #!/bin/bash
+#
+# Installs the Booddies 'regi' service.
 
-# Hard-link the systemd unit:
-ln -f regi.service /etc/systemd/system/regi.service
-ln -f bin/runctl /usr/local/sbin/runctl-regi
+#------------------------------------------------------------------------------
+# Globals:
+#------------------------------------------------------------------------------
 
-# Populate config if not present:
-[ -d /etc/booddies ] || mkdir /etc/booddies
-[ ! -f /etc/booddies/regi.conf ] && cp regi.conf /etc/booddies/
+E_BAD_LN=1
+E_BAD_MKDIR=1
+E_BAD_CP=1
 
-# Reload systemd:
-systemctl daemon-reload
+#------------------------------------------------------------------------------
+# Source miscellaneous bash functions:
+#------------------------------------------------------------------------------
+
+source ../../bin/misclib.sh
+
+#------------------------------------------------------------------------------
+# Install /etc/systemd/system/regi.service
+#------------------------------------------------------------------------------
+
+target='regi.service'
+link_name='/etc/systemd/system/regi.service'
+msg="Install ${link_name}"
+
+misc::stat_busy "${msg}"
+
+if ! ln -f "${target}" "${link_name}"; then
+  misc::log "[ERROR] ${msg}"
+  misc::stat_fail
+  exit "${E_BAD_LN}"
+else
+  misc::stat_done
+fi
+
+#------------------------------------------------------------------------------
+# Install /usr/local/sbin/runctl-regi
+#------------------------------------------------------------------------------
+
+target='bin/runctl'
+link_name='/usr/local/sbin/runctl-regi'
+msg="Install ${link_name}"
+
+misc::stat_busy "${msg}"
+
+if ! ln -f "${target}" "${link_name}"; then
+  misc::log "[ERROR] ${msg}"
+  misc::stat_fail
+  exit "${E_BAD_LN}"
+else
+  misc::stat_done
+fi
+
+#------------------------------------------------------------------------------
+# Install /etc/booddies/regi.conf
+#------------------------------------------------------------------------------
+
+msg1='Create /etc/booddies directory'
+msg2='Install /etc/booddies/regi.conf'
+
+misc::stat_busy "${msg2}"
+
+if [[ ! -d /etc/booddies ]]; then
+  if ! mkdir /etc/booddies; then
+    misc::log "[ERROR] ${msg1}"
+    misc::stat_fail
+    exit "${E_BAD_MKDIR}"
+  fi
+fi
+
+if [[ ! -f /etc/booddies/regi.conf ]]; then
+  if ! cp regi.conf /etc/booddies/; then
+    misc::log "[ERROR] ${msg2}"
+    misc::stat_fail
+    exit "${E_BAD_CP}"
+  fi
+else
+  misc::stat_done
+fi
