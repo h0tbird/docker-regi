@@ -181,8 +181,11 @@ function run_post() {
   local MSG2="[Post] OK! The DHCP client returned successfully"
   local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
   [ -f /run/dhcpcd-eth1* ] && rm -f /run/dhcpcd-eth1*
+  [ -f /var/lib/dhcpcd/dhcpcd-eth1* ] && rm -f /var/lib/dhcpcd/dhcpcd-eth1*
   echo ${MSG1}; ${CMD_IP} netns exec ${PID} dhcpcd -4 -A -c /bin/true -q eth1 -h ${ID} && \
   echo ${MSG2} || { echo ${MSG3}; exit 8; }
+  [ -f /run/dhcpcd-eth1* ] && rm -f /run/dhcpcd-eth1*
+  [ -f /var/lib/dhcpcd/dhcpcd-eth1* ] && rm -f /var/lib/dhcpcd/dhcpcd-eth1*
 }
 
 #------------------------------------------------------------------------------
