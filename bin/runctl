@@ -15,6 +15,9 @@ readonly E_BAD_CONF=11
 readonly CMD_DOCKER=$(type -P docker); [ -z "${CMD_DOCKER}" ] && exit ${E_BAD_CMD}
 readonly CMD_IP=$(type -P ip); [ -z "${CMD_IP}" ] && exit ${E_BAD_CMD}
 readonly CMD_BRCTL=$(type -P brctl); [ -z "${CMD_BRCTL}" ] && exit ${E_BAD_CMD}
+readonly CMD_MD5SUM=$(type -P md5sum); [ -z "${CMD_MD5SUM}" ] && exit ${E_BAD_CMD}
+readonly CMD_EXDUMP=$(type -P exdump); [ -z "${CMD_EXDUMP}" ] && exit ${E_BAD_CMD}
+readonly CMD_DHCPCD=$(type -P dhcpcd); [ -z "${CMD_DHCPCD}" ] && exit ${E_BAD_CMD}
 
 #------------------------------------------------------------------------------
 # Source and verify the configuration:
@@ -33,8 +36,8 @@ source /etc/booddies/regi.conf || ${E_BAD_CONF}
 #------------------------------------------------------------------------------
 
 function genmac() {
-  echo "${HOSTNAME}" | md5sum | \
-  hexdump -n3 -e "/3 \"${OUI}\" 3/1 \":%02X\""
+  echo "${HOSTNAME}" | ${CMD_MD5SUM} | \
+  ${CMD_EXDUMP} -n3 -e "/3 \"${OUI}\" 3/1 \":%02X\""
 }
 
 #------------------------------------------------------------------------------
@@ -169,23 +172,19 @@ function run_post() {
   echo ${MSG1}; ${CMD_IP} link set netns ${PID} dev ${ID}-int && \
   echo ${MSG2} || { echo ${MSG3}; exit 6; }
 
+  # Use DHCP to setup the container's IP address:
+  local MSG1="[Post] Running DHCP client on container's interface..."
+  local MSG2="[Post] OK! The DHCP client returned successfully"
+  local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
+  echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_DHCPCD} -4 -A -c /bin/true -q ${ID}-int -h ${ID} && \
+  echo ${MSG2} || { echo ${MSG3}; exit 8; }
+
   # Rename the container's peer interface to eth1:
   local MSG1="[Post] Renaming container's '${ID}-int' to eth1..."
   local MSG2="[Post] OK! '${ID}-int' has been renamed to eth1"
   local MSG3="[Post] Ops! Cannot rename '${ID}-int'"
   echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_IP} link set ${ID}-int name eth1 && \
   echo ${MSG2} || { echo ${MSG3}; exit 7; }
-
-  # Use DHCP to setup the container's eth1 IP address:
-  local MSG1="[Post] Running DHCP client on container's eth1..."
-  local MSG2="[Post] OK! The DHCP client returned successfully"
-  local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
-  [ -f /run/dhcpcd-eth1* ] && rm -f /run/dhcpcd-eth1*
-  [ -f /var/lib/dhcpcd/dhcpcd-eth1* ] && rm -f /var/lib/dhcpcd/dhcpcd-eth1*
-  echo ${MSG1}; ${CMD_IP} netns exec ${PID} dhcpcd -4 -A -c /bin/true -q eth1 -h ${ID} && \
-  echo ${MSG2} || { echo ${MSG3}; exit 8; }
-  [ -f /run/dhcpcd-eth1* ] && rm -f /run/dhcpcd-eth1*
-  [ -f /var/lib/dhcpcd/dhcpcd-eth1* ] && rm -f /var/lib/dhcpcd/dhcpcd-eth1*
 }
 
 #------------------------------------------------------------------------------
