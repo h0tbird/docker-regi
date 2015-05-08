@@ -17,7 +17,7 @@ readonly CMD_IP=$(type -P ip); [ -z "${CMD_IP}" ] && exit ${E_BAD_CMD}
 readonly CMD_BRCTL=$(type -P brctl); [ -z "${CMD_BRCTL}" ] && exit ${E_BAD_CMD}
 readonly CMD_MD5SUM=$(type -P md5sum); [ -z "${CMD_MD5SUM}" ] && exit ${E_BAD_CMD}
 readonly CMD_HEXDUMP=$(type -P hexdump); [ -z "${CMD_HEXDUMP}" ] && exit ${E_BAD_CMD}
-readonly CMD_DHCPCD=$(type -P dhcpcd); [ -z "${CMD_DHCPCD}" ] && exit ${E_BAD_CMD}
+readonly CMD_NSENTER=$(type -P nsenter); [ -z "${CMD_NSENTER}" ] && exit ${E_BAD_CMD}
 
 #------------------------------------------------------------------------------
 # Source and verify the configuration:
@@ -172,19 +172,19 @@ function run_post() {
   echo ${MSG1}; ${CMD_IP} link set netns ${PID} dev ${ID}-int && \
   echo ${MSG2} || { echo ${MSG3}; exit 6; }
 
-  # Use DHCP to setup the container's IP address:
-  local MSG1="[Post] Running DHCP client on container's interface..."
-  local MSG2="[Post] OK! The DHCP client returned successfully"
-  local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
-  echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_DHCPCD} -4 -A -c /bin/true -q ${ID}-int -h ${ID} && \
-  echo ${MSG2} || { echo ${MSG3}; exit 8; }
-
   # Rename the container's peer interface to eth1:
   local MSG1="[Post] Renaming container's '${ID}-int' to eth1..."
   local MSG2="[Post] OK! '${ID}-int' has been renamed to eth1"
   local MSG3="[Post] Ops! Cannot rename '${ID}-int'"
   echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_IP} link set ${ID}-int name eth1 && \
   echo ${MSG2} || { echo ${MSG3}; exit 7; }
+
+  # Use DHCP to setup the container's IP address:
+  local MSG1="[Post] Running DHCP client on container's interface..."
+  local MSG2="[Post] OK! The DHCP client returned successfully"
+  local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
+  echo ${MSG1}; ${CMD_NSENTER} -m -u -i -n -p -t ${PID} /usr/sbin/dhclient -4 -v -H ${ID} eth1 && \
+  echo ${MSG2} || { echo ${MSG3}; exit 8; }
 }
 
 #------------------------------------------------------------------------------

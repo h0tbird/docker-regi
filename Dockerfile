@@ -13,7 +13,7 @@ RUN rpm --import http://mirror.centos.org/centos/7/os/x86_64/RPM-GPG-KEY-CentOS-
 RUN rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
 RUN yum update -y && yum clean all
 RUN yum install -y epel-release && yum clean all
-RUN yum install -y docker-registry && yum clean all
+RUN yum install -y dhclient docker-registry && yum clean all
 ADD rootfs /
 
 #------------------------------------------------------------------------------
