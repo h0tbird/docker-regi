@@ -9,6 +9,10 @@ MAINTAINER Marc Villacorta Morera <marc.villacorta@gmail.com>
 # Install:
 #------------------------------------------------------------------------------
 
+RUN apt-get update && \
+    apt-get install -y isc-dhcp-client && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 ADD rootfs /
 
 #------------------------------------------------------------------------------
