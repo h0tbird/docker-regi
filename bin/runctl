@@ -185,7 +185,7 @@ function run_post() {
   local MSG1="[Post] Running DHCP client on container's interface..."
   local MSG2="[Post] OK! The DHCP client returned successfully"
   local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
-  echo ${MSG1}; ${CMD_NSENTER} -m -u -i -n -p -t ${PID} -- dhclient -4 -v -H ${ID} eth1 && \
+  echo ${MSG1}; ${CMD_NSENTER} -m -u -i -n -p -t ${PID} -- /sbin/dhcpcd -4 -A -c true -q -h ${ID} eth1 && \
   echo ${MSG2} || { echo ${MSG3}; exit 8; }
 }
 
