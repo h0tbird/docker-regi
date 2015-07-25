@@ -109,11 +109,12 @@ function run_pre() {
 
 function run_start() {
   exec ${CMD_DOCKER} run -t \
-  --volume   ${DATA_DIR}:/var/lib/docker-registry \
+  --volume   ${DATA_DIR}:/var/lib/registry \
   --hostname "${HOSTNAME}" \
   --name     "${ID}" \
   --net      none \
   --env      WAIT_NETWORK=true \
+  --env      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry \
   ${IMAGE}
 }
 

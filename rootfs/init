@@ -24,17 +24,8 @@
 }
 
 #------------------------------------------------------------------------------
-# Configure the service:
-#------------------------------------------------------------------------------
-
-echo '[Init] Configuring the service...'
-export DOCKER_REGISTRY_CONFIG='/etc/docker-registry.yml'
-export SETTINGS_FLAVOR='local'
-
-#------------------------------------------------------------------------------
 # Run:
 #------------------------------------------------------------------------------
 
 echo "[Init] Executing: $*"
-cd /usr/lib/python2.7/site-packages/docker-registry
 exec $*
