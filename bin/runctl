@@ -31,6 +31,7 @@ source /etc/booddies/regi.conf || ${E_BAD_CONF}
 [ -z "${HOSTNAME}" ] && echo 'Ops! HOSTNAME is not set' && exit ${E_BAD_CONF}
 [ -z "${DATA_DIR}" ] && echo 'Ops! DATA_DIR is not set' && exit ${E_BAD_CONF}
 [ -z "${HOST_BRIDGE}" ] && echo 'Ops! HOST_BRIDGE is not set' && exit ${E_BAD_CONF}
+[ -z "${IFACE}" ] && echo 'Ops! IFACE is not set' && exit ${E_BAD_CONF}
 
 #------------------------------------------------------------------------------
 # Functions:
@@ -90,14 +91,14 @@ function run_pre() {
   echo ${MSG2}; ${CMD_BRCTL} addbr ${HOST_BRIDGE} && echo ${MSG3} || {
   echo ${MSG4}; exit 5; } } || echo ${MSG5}
 
-  # Download the image if not present or is tagged as 'latest':
+  # Download the image if not present or FORCE_PULL_IMAGE is true:
   local MSG1="[Pre] Checking if '${IMAGE}' has to be downloaded..."
   local MSG2="[Pre] Yes, downloading the image '${IMAGE}' now..."
   local MSG3="[Pre] OK! The image '${IMAGE}' is up to date"
   local MSG4="[Pre] Ops! Failed to download the image '${IMAGE}'"
   local MSG5="[Pre] OK! The image '${IMAGE}' already exists"
-  (! ${CMD_DOCKER} images | grep -q ${IMAGE}); COND1=$?
-  ${CMD_DOCKER} images | grep ${IMAGE} | grep -q latest; COND2=$?
+  (! ${CMD_DOCKER} images | grep "${IMAGE%%:*}" | grep -q "${IMAGE##*:}"); COND1=$?
+  [ "${FORCE_PULL_IMAGE}" == 'true' ]; COND2=$?
   echo ${MSG1}; [[ "${COND1}" -eq 0 || "${COND2}" -eq 0 ]] && {
   echo ${MSG2}; ${CMD_DOCKER} pull ${IMAGE} &> /dev/null && echo ${MSG3} || {
   echo ${MSG4}; exit 6; } } || echo ${MSG5}
@@ -174,18 +175,18 @@ function run_post() {
   echo ${MSG1}; ${CMD_IP} link set netns ${PID} dev ${ID}-int && \
   echo ${MSG2} || { echo ${MSG3}; exit 6; }
 
-  # Rename the container's peer interface to eth1:
-  local MSG1="[Post] Renaming container's '${ID}-int' to eth1..."
-  local MSG2="[Post] OK! '${ID}-int' has been renamed to eth1"
+  # Rename the container's peer interface:
+  local MSG1="[Post] Renaming container's '${ID}-int' to ${IFACE}..."
+  local MSG2="[Post] OK! '${ID}-int' has been renamed to ${IFACE}"
   local MSG3="[Post] Ops! Cannot rename '${ID}-int'"
-  echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_IP} link set ${ID}-int name eth1 && \
+  echo ${MSG1}; ${CMD_IP} netns exec ${PID} ${CMD_IP} link set ${ID}-int name ${IFACE} && \
   echo ${MSG2} || { echo ${MSG3}; exit 7; }
 
   # Use DHCP to setup the container's IP address:
   local MSG1="[Post] Running DHCP client on container's interface..."
   local MSG2="[Post] OK! The DHCP client returned successfully"
   local MSG3="[Post] Ops! The DHCP client returned a non-zero value"
-  echo ${MSG1}; ${CMD_NSENTER} -m -u -i -n -p -t ${PID} -- /sbin/dhcpcd -4 -A -c true -q -h ${ID} eth1 && \
+  echo ${MSG1}; ${CMD_NSENTER} -m -u -i -n -p -t ${PID} -- /sbin/dhclient -4 -1 -v ${IFACE} && \
   echo ${MSG2} || { echo ${MSG3}; exit 8; }
 }
 
