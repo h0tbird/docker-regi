@@ -4,9 +4,6 @@
 # Globals:
 #------------------------------------------------------------------------------
 
-# Settings:
-readonly OUI='00:16:3e'
-
 # Return codes:
 readonly E_BAD_CMD=10
 readonly E_BAD_CONF=11
@@ -32,6 +29,7 @@ source /etc/booddies/regi.conf || ${E_BAD_CONF}
 [ -z "${DATA_DIR}" ] && echo 'Ops! DATA_DIR is not set' && exit ${E_BAD_CONF}
 [ -z "${HOST_BRIDGE}" ] && echo 'Ops! HOST_BRIDGE is not set' && exit ${E_BAD_CONF}
 [ -z "${IFACE}" ] && echo 'Ops! IFACE is not set' && exit ${E_BAD_CONF}
+[ -z "${OUI}" ] && echo 'Ops! OUI is not set' && exit ${E_BAD_CONF}
 
 #------------------------------------------------------------------------------
 # Functions:
