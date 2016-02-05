@@ -1,7 +1,8 @@
 # docker-regi
 
 [![Build Status](https://travis-ci.org/h0tbird/docker-regi.svg?branch=master)](https://travis-ci.org/h0tbird/docker-regi)
-[![](https://badge.imagelayers.io/h0tbird/regi:latest.svg)](https://imagelayers.io/?images=h0tbird/regi:latest 'Get your own badge on imagelayers.io')
+[![](https://img.shields.io/imagelayers/image-size/h0tbird/regi/latest.svg)](https://imagelayers.io/?images=h0tbird/regi:latest)
+[![](https://img.shields.io/imagelayers/layers/h0tbird/regi/latest.svg)](https://imagelayers.io/?images=h0tbird/regi:latest)
 
 This container is member of the [*booddies*](https://github.com/h0tbird/booddies) fellowship.
 
